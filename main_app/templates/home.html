@@ -1,15 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Events</title>
-    </head>
-    <body>
-        {% extends 'base.html' %}
-        {% block content %}
-        <h1>Events Home</h1>
-        {% endblock %}
-    </body>
-</html>
+{% extends 'base.html' %} 
+{% block content %}
+<div class="home__playlists">
+    {% for tour in tours %}
+
+        <div class="playlist mb-5">
+            <h3 class="title is-3 has-text-success">{{tour.tour_name}}</h3>
+            <hr />
+
+            {% for event in tour.events.all %}
+
+                <div class="song">
+                    <span>{{forloop.counter}}</span>
+
+                    <span><b>{{event.location}}</b></span>
+                    <span>{{event.get_tour_date}}</span>
+                </div>
+
+            {% endfor %}
+        </div>
+    {% empty %} 
+        <div class="tour mb-5">"There are no dates in this tour"</div>
+    {% endfor %}
+</div>
+{% endblock %}

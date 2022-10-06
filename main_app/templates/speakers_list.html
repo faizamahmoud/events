@@ -14,11 +14,12 @@
   </div>
   <!--  This anchor tag will redirect back to artist list without a query param -->
   <a class="button is-dark" href="{% url 'speakers_list' %}">Clear Search</a>
-  <a class="button is-dark" href="{% url 'speakers_create' %}">Request Speaker</a>
+  
+  <a class="button is-dark" href="{% url 'speakers_create' %}">Add Speaker</a>
 </form>
 <div class="gallery">
   {% for speaker in speakers %}
-  <a href="">
+  <a href="{% url 'speakers_detail' speaker.pk %}"></a>
     <div class="card">
       <div class="card-image">
         <figure class="image is-square">

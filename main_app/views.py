@@ -1,9 +1,12 @@
 from django.shortcuts import render
+from django.shortcuts import redirect
+from django.urls import reverse
 from django.views import View # <- View class to handle requests
 from django.http import HttpResponse # <- a class to handle sending a type of response
 # This will import the class we are extending 
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from .models import Speaker
+from django.views.generic import DetailView
+from .models import Speaker, Event, Tour
 from django.views.generic.base import TemplateView
 
 # Create your views here.
@@ -22,8 +25,15 @@ class About(View):
     def get(self, request):
         return HttpResponse("Events About")
     
+
 class Home(TemplateView):
     template_name = "home.html"
+    # Here we have added the playlists as context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tours"] = Tour.objects.all()
+        return context
+
     
 #...
 class About(TemplateView):
@@ -55,19 +65,47 @@ class SpeakersList(TemplateView):
         name = self.request.GET.get("name") 
         if name != None:
             # .filter is the sql WHERE statement and name__icontains is doing a search for any name that contains the query param
-            context["speaker"] = Speaker.objects.filter(name__icontains=name)
+            context["speakers"] = Speaker.objects.filter(name__icontains=name)
             context["header"] = f"Searching for {name}"
         else:
-            context["speaker"] = Speaker.objects.all() # SELECT * FROM table
+            context["speakers"] = Speaker.objects.all() # SELECT * FROM table
             context["header"] = "Trending Speakers"
         return context
         
         
-
-class ArtistCreate(CreateView):
+# create form
+class SpeakersCreate(CreateView):
     model = Speaker
-    fields = ['name', 'image', 'topic', 'description', 'verified_artist']
+    fields = ['name', 'image', 'topic', 'description', 'verified_speaker']
     template_name = "speakers_create.html"
-    success_url = "/speakers/"
+    # success_url = "/speakers/"
+    def get_success_url(self):
+        return reverse('speakers_detail', kwargs={'pk': self.object.pk})
             
-        
+class SpeakersDetail(DetailView):
+    model = Speaker
+    template_name = "speakers_detail.html"
+    
+    
+
+class SpeakersUpdate(UpdateView):
+    model = Speaker
+    fields = ['name', 'image', 'topic', 'description', 'verified_speaker']
+    template_name = "speakers_update.html"
+    # success_url = "/speakers/"
+    def get_success_url(self):
+        return reverse('speakers_detail', kwargs={'pk': self.object.pk})
+    
+class SpeakersDelete(DeleteView):
+    model = Speaker
+    template_name = "speakers_delete_confirmation.html"
+    success_url = "/speakers/"
+    
+    
+class EventCreate(View):
+
+    def post(self, request, pk):
+        location = request.POST.get("location")
+        speaker = Speaker.objects.get(pk=pk)
+        Event.objects.create(location=location, speaker=speaker)
+        return redirect('speakers_detail', pk=pk)
