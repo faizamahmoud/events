@@ -86,6 +86,11 @@ class SpeakersDetail(DetailView):
     model = Speaker
     template_name = "speakers_detail.html"
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tours"] = Tour.objects.all()
+        return context
+    
     
 
 class SpeakersUpdate(UpdateView):
@@ -107,5 +112,21 @@ class EventCreate(View):
     def post(self, request, pk):
         location = request.POST.get("location")
         speaker = Speaker.objects.get(pk=pk)
-        Event.objects.create(location=location, speaker=speaker)
+        Event.objects.create(location=location, speakers=speaker)
         return redirect('speakers_detail', pk=pk)
+    
+
+class TourEventAssoc(View):
+
+    def get(self, request, pk, event_pk):
+        # get the query param from the url
+        assoc = request.GET.get("assoc")
+        if assoc == "remove":
+            Tour.objects.get(pk=pk).events.remove(event_pk)
+        if assoc == "add":
+            Tour.objects.get(pk=pk).events.add(event_pk)
+        return redirect('home')
+
+
+
+
